@@ -5,12 +5,12 @@ class Database:
     def __init__(self, sqlite_db, table_name, table_columns):
         self.sqlite_db = sqlite_db
         self.table_name = table_name
-        self.table_columns = table_columns
+        self.table_columns = list(map(lambda tup: tup[0], table_columns))
 
         con = sqlite3.connect(self.sqlite_db, detect_types=sqlite3.PARSE_DECLTYPES)
         cur = con.cursor()
         cur.execute(f"""
-            CREATE TABLE IF NOT EXISTS {self.table_name}({', '.join(self.table_columns)})
+            CREATE TABLE IF NOT EXISTS {self.table_name}({', '.join(map(lambda tup: tup[0] if tup[0] == tup[-1] else f'{tup[0]} {tup[-1]}', table_columns))})
         """)
 
 
@@ -45,6 +45,27 @@ class Database:
             SELECT * FROM {self.table_name} WHERE rowid = {id}
         """)
         return get_row.fetchone()
+
+
+    def update_by_id(self, id, data):
+        num_table_cols = len(self.table_columns)
+        num_data_inserting = len(data)
+        if num_table_cols != num_data_inserting:
+            warning = f'data provided: requested {num_cols}; received {num_data}'
+            if num_table_cols > num_data_inserting:
+                warning = f'too few {warning}'
+            elif num_table_cols < num_data_inserting:
+                warning = f'too many {warning}'
+            print(f'[WARNING] {warning}')
+
+        con = sqlite3.connect(self.sqlite_db, detect_types=sqlite3.PARSE_DECLTYPES)
+        cur = con.cursor()
+        update_row = cur.execute(f"""
+            UPDATE {self.table_name}
+            SET { ', '.join(map(lambda tup: f'{tup[0]}="{tup[-1]}"', zip(self.table_columns, data))) }
+            WHERE rowid = {id} AND { ' AND '.join(map(lambda col: f'NOT {col} IS NULL', self.table_columns)) }
+        """)
+        con.commit()
 
 
     def delete_by_id(self, id):

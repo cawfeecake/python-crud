@@ -1,6 +1,6 @@
 from .database import Database
 
-items = Database('backend.db', 'items', ['name', 'desc', 'c children'])
+items = Database('backend.db', 'items', [('name',), ('desc',), ('c', 'children')])
 
 import sqlite3
 from children import *

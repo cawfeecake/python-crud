@@ -15,6 +15,7 @@ app = Flask(__name__)
 
 # DEBUG;; TOREMOVE
 print(get_all_tables('backend.db'))
+#delete_by_id('backend.db', 'movies', 14)
 #delete_table('backend.db', 'items')
 
 
@@ -57,14 +58,28 @@ def get_movies():
     """
 
 
-@app.route('/movies/<int:movie_id>/', methods=['GET', 'DELETE'])
+# TODO if able, use PUT instead of POST as it is more appropriate as it is an update
+@app.route('/movies/<int:movie_id>/', methods=['GET', 'DELETE', 'POST'])
 def get_movie_by_id(movie_id):
     if request.method == 'DELETE':
         movies.delete_by_id(movie_id)
         return 'OK', 204
+    elif request.method == 'POST':
+        movie_name = request.form.get('name')
+        movie_year = request.form.get('year')
+        rating_x, rating_y = (float(request.form.get('x')), float(request.form.get('y')))
+        update_data = [movie_name, movie_year, Point(rating_x, rating_y)]
+        movies.update_by_id(movie_id, update_data)
+        # have this method handler "waterfall" into default (i.e. GET) request path; will get current info for $movie_id
     return f"""
         <p>{ movies.get_by_id(movie_id) }</p>
         <hr />
+        <form method="POST">
+          <div><label>Name: <input type="text" name="name"></label></div>
+          <div><label>Year: <input type="text" name="year"></label></div>
+          <div><label>Rating Point: <input type="text" name="x"><input type="text" name="y"></label></div>
+          <input type="submit" value="Update">
+        </form>
         <button onclick="delete_movie()">Delete</button>
         <script>
           function delete_movie() {{

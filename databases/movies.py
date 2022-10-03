@@ -1,6 +1,6 @@
 from .database import Database
 
-movies = Database('backend.db', 'movies', ['title', 'year', 'score point'])
+movies = Database('backend.db', 'movies', [('title',), ('year',), ('score', 'point')])
 
 import sqlite3
 from point import *

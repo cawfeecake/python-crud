@@ -13,3 +13,10 @@ def delete_table(sqlite_db, table_name):
     cursor = connection.cursor()
     drop = cursor.execute(f'DROP TABLE {table_name}')
     connection.commit()
+
+
+def delete_by_id(sqlite_db, table_name, id):
+    connection = sqlite3.connect(sqlite_db)
+    cursor = connection.cursor()
+    delete = cursor.execute(f'DELETE FROM {table_name} WHERE rowId = {id}')
+    connection.commit()
