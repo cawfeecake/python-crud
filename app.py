@@ -1,6 +1,6 @@
 import json
 from markupsafe import escape
-from flask import Flask, abort, request
+from flask import Flask, abort, redirect, request, url_for
 
 
 # for DEBUG;;
@@ -15,6 +15,7 @@ app = Flask(__name__)
 
 # DEBUG;; TOREMOVE
 print(get_all_tables('backend.db'))
+#delete_table('backend.db', 'items')
 
 
 @app.route('/')
@@ -43,13 +44,12 @@ def get_movies():
         #    <h1>Added the movie: {movie_name}</h1>
         #    <pre>{insert_id[0]}</pre>
         #"""
-
     return f"""
         <form method="POST">
-            <div><label>Name: <input type="text" name="name"></label></div>
-            <div><label>Year: <input type="text" name="year"></label></div>
-            <div><label>Rating Point: <input type="text" name="x"><input type="text" name="y"></label></div>
-            <input type="submit" value="Submit">
+          <div><label>Name: <input type="text" name="name"></label></div>
+          <div><label>Year: <input type="text" name="year"></label></div>
+          <div><label>Rating Point: <input type="text" name="x"><input type="text" name="y"></label></div>
+          <input type="submit" value="Submit">
         </form>
         <hr />
         {'<p>Inserted: ' + ' '.join([str(i) for i in insert_ids]) if insert_ids else ''}
@@ -57,9 +57,50 @@ def get_movies():
     """
 
 
-@app.route('/movies/<int:movie_id>/')
+@app.route('/movies/<int:movie_id>/', methods=['GET', 'DELETE'])
 def get_movie_by_id(movie_id):
-    return f"""<p>{movies.get_by_id(movie_id)}</p>"""
+    if request.method == 'DELETE':
+        movies.delete_by_id(movie_id)
+        return 'OK', 204
+    return f"""
+        <p>{ movies.get_by_id(movie_id) }</p>
+        <hr />
+        <button onclick="delete_movie()">Delete</button>
+        <script>
+          function delete_movie() {{
+            const delete_url = '{ url_for('get_movie_by_id', movie_id=movie_id) }';
+            fetch(delete_url, {{ method: 'DELETE' }})
+              .then(() => {{ window.location.href = '{ url_for('get_movies') }'; }})
+          }}
+        </script>
+    """
+
+
+# data = [
+#     ('name', 'desc', children) ...,
+#     ('Monty Python and the Holy Grail', 1975, p1),
+#     ('And Now for Something Completely Different', 1971, p2),
+#     ('Another movie', 1977, p3),
+# ]
+@app.route('/items/', methods=['GET', 'POST'])
+def get_items():
+    insert_ids = None
+    if request.method == 'POST':
+        name = request.form.get('name')
+        desc = request.form.get('desc')
+        child = request.form.get('child')
+        insert_ids = items.insert_data([(name, desc, Children([child, 1]))])
+    return f"""
+        <form method="POST">
+          <div><label>Name: <input type="text" name="name"></label></div>
+          <div><label>Description: <input type="text" name="desc"></label></div>
+          <div><label>A child: <input type="text" name="child"></label></div>
+          <input type="submit" value="Submit">
+        </form>
+        <hr />
+        {'<p>Inserted: ' + ' '.join([str(i) for i in insert_ids]) if insert_ids else ''}
+        <p>{items.get_all()}</p>
+    """
 
 
 @app.route('/about/')

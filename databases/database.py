@@ -47,6 +47,15 @@ class Database:
         return get_row.fetchone()
 
 
+    def delete_by_id(self, id):
+        con = sqlite3.connect(self.sqlite_db, detect_types=sqlite3.PARSE_DECLTYPES)
+        cur = con.cursor()
+        cur.execute(f"""
+            DELETE FROM {self.table_name} WHERE rowid = {id}
+        """)
+        con.commit()
+
+
     def get_all(self):
         con = sqlite3.connect(self.sqlite_db, detect_types=sqlite3.PARSE_DECLTYPES)
         cur = con.cursor()
