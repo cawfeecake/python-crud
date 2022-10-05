@@ -4,7 +4,7 @@ from flask import Flask, abort, redirect, request, url_for
 
 
 # for DEBUG;;
-from database_tools import *
+from databases.database_tools import *
 # Add more tables here...
 from databases.movies import *
 from databases.items import *
@@ -45,6 +45,7 @@ def get_movies():
         #    <h1>Added the movie: {movie_name}</h1>
         #    <pre>{insert_id[0]}</pre>
         #"""
+    all_movies = movies.get_all()
     return f"""
         <form method="POST">
           <div><label>Name: <input type="text" name="name"></label></div>
@@ -54,7 +55,8 @@ def get_movies():
         </form>
         <hr />
         {'<p>Inserted: ' + ' '.join([str(i) for i in insert_ids]) if insert_ids else ''}
-        <p>{movies.get_all()}</p>
+        <p>{all_movies}</p>
+        <p>Movie count: {len(all_movies)}</p>
     """
 
 
