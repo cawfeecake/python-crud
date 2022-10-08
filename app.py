@@ -3,9 +3,7 @@ from markupsafe import escape
 from flask import Flask, abort, redirect, request, url_for
 
 
-# for DEBUG;;
-from databases.database_tools import *
-# Add more tables here...
+# Import depended on tables here
 from databases.movies import *
 from databases.items import *
 
@@ -13,8 +11,11 @@ from databases.items import *
 app = Flask(__name__)
 
 
+# for DEBUG;;
+from databases.database_tools import *
 # DEBUG;; TOREMOVE
 print(get_all_tables('backend.db'))
+# TROUBLESHOOTING;;
 #delete_by_id('backend.db', 'movies', 14)
 #delete_table('backend.db', 'items')
 
@@ -22,9 +23,10 @@ print(get_all_tables('backend.db'))
 @app.route('/')
 def index():
     return f"""
-        <h1>What's in the table?</h1>
+        <h1>What's in the "movies" table?</h1>
         <p>There are {len(movies.get_all())} movies in the database!</p>
     """
+
 
 # data = [
 #     ('Monty Python and the Holy Grail', 1975, p1),
@@ -54,9 +56,21 @@ def get_movies():
           <input type="submit" value="Submit">
         </form>
         <hr />
-        {'<p>Inserted: ' + ' '.join([str(i) for i in insert_ids]) if insert_ids else ''}
-        <p>{all_movies}</p>
-        <p>Movie count: {len(all_movies)}</p>
+        { f'<p>Inserted: { " ".join([str(i) for i in insert_ids]) }</p>' if insert_ids else '' }
+        <ol>
+          <li>{ '</li><li>'.join(get_html_movie(m) for m in all_movies) }</li>
+        </ol>
+    """
+
+
+def get_html_movie(movie):
+    movie_id = movie[0]
+    movie_name = movie[1]
+    movie_year = movie[2]
+    return f"""
+        <div>
+          <a href="{ url_for('get_movie_by_id', movie_id=movie_id) }">{movie_name}, ({movie_year})</a>
+        </div>
     """
 
 
@@ -95,9 +109,8 @@ def get_movie_by_id(movie_id):
 
 # data = [
 #     ('name', 'desc', children) ...,
-#     ('Monty Python and the Holy Grail', 1975, p1),
-#     ('And Now for Something Completely Different', 1971, p2),
-#     ('Another movie', 1977, p3),
+#     ('comb', 'used to brush my hair', []),
+#     ('cabinet', '3 stacked plastic drawers', [-1]),
 # ]
 @app.route('/items/', methods=['GET', 'POST'])
 def get_items():
@@ -107,6 +120,7 @@ def get_items():
         desc = request.form.get('desc')
         child = request.form.get('child')
         insert_ids = items.insert_data([(name, desc, Children([child, 1]))])
+    all_items = items.get_all()
     return f"""
         <form method="POST">
           <div><label>Name: <input type="text" name="name"></label></div>
@@ -115,11 +129,36 @@ def get_items():
           <input type="submit" value="Submit">
         </form>
         <hr />
-        {'<p>Inserted: ' + ' '.join([str(i) for i in insert_ids]) if insert_ids else ''}
-        <p>{items.get_all()}</p>
+        { f'<p>Inserted: { " ".join([str(i) for i in insert_ids]) }</p>' if insert_ids else '' }
+        <p>Count: {len(all_items)}</p>
+        <p>{all_items}</p>
     """
 
 
+@app.route('/items/<int:item_id>/', methods=['GET', 'DELETE', 'POST'])
+def get_item_by_id(item_id):
+    if request.method == 'DELETE':
+        items.delete_by_id(item_id)
+        return 'OK', 204
+    elif request.method == 'POST':
+        movie_name = request.form.get('name')
+        movie_year = request.form.get('year')
+        rating_x, rating_y = (float(request.form.get('x')), float(request.form.get('y')))
+        update_data = [movie_name, movie_year, Point(rating_x, rating_y)]
+        items.update_by_id(item_id, update_data)
+    return f"""
+        <p>{items.get_by_id(item_id)}</p>
+        <hr />
+        <form method="POST">
+          <div><label>Name: <input type="text" name="name"></label></div>
+          <div><label>Year: <input type="text" name="year"></label></div>
+          <div><label>Rating Point: <input type="text" name="x"><input type="text" name="y"></label></div>
+          <input type="submit" value="Update">
+        </form>
+    """
+
+
+# TODO: TOREMOVE
 @app.route('/about/')
 def about():
     return '<h3>This is a Flask web application.</h3>'
