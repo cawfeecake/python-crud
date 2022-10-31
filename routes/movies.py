@@ -18,11 +18,7 @@ def get_movies():
         movie_year = request.form.get('year')
         rating_x, rating_y = (float(request.form.get('x')), float(request.form.get('y')))
         insert_ids = movies.insert_data([(movie_name, movie_year, Point(rating_x, rating_y))])
-        # use a return here if you want to redirect away when doing POST
-        #return f"""
-        #    <h1>Added the movie: {movie_name}</h1>
-        #    <pre>{insert_id[0]}</pre>
-        #"""
+        return redirect(url_for('get_movies'))
     all_movies = movies.get_all()
     return f"""
         <form method="POST">
