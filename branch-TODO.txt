@@ -1,0 +1,16 @@
+* create items table
+* create model, get it to be seen on screen w/ ways to edit, etc.
+    * edit name
+    * edit quantity
+    * add arbitrary notes
+    * edit description
+* document whole process of following!
+ - create migration (inital?)**
+ - change something about item in model (idk, like add a field)
+ - go through adding migration
+ - go through "trimming" that migration
+  o i.e. the process involved to have the app start at a correct inital (see step**)
+    * semi-goal: automate the migration process?
+     - limit "no-code" migrations to adding tables, col; moving data
+     - only delete cols 1 migration after moving data and only if col empty
+     - keep the migration as small as possible (auto-trim)
