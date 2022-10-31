@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, url_for # remove request after moving all routes
+from flask import Flask, url_for
 
 
 _app = Flask(__name__)
@@ -12,6 +12,20 @@ def create_backend(app, db_path):
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     db.init_app(app)
 
+
+    # for DEBUG;;
+    ##############
+    from databases.database_tools import get_all_tables#, delete_table, delete_by_id
+
+    print(get_all_tables(_db_path))
+
+    # ad-hoc db changes
+    #delete_table(_db_path, 'items')
+    #delete_by_id(_db_path, 'movies', 14)
+    ##############
+    # for DEBUG;;
+
+
     # toggle this to determine what we need for adding tables, etc.
     #if not os.path.exists(DB_NAME):
     #    with app.app_context():
@@ -19,8 +33,8 @@ def create_backend(app, db_path):
     #    print(f'created tables in backend.')
 
 
-_db_path = 'backend.db'
-create_backend(_app, _db_path)
+_db_path = 'backend.db' # TODO put in a config
+create_backend(_app, _db_path) # TODO refactor into own file; import
 
 
 index_funcs = []
@@ -58,39 +72,3 @@ def index():
         <h2>Backend Status:</h2>
         <p>file { _db_path } is currently { round(file_size, 2) } { size_dim } in size</p>
     """
-
-
-# ====================================
-
-
-# for DEBUG;;
-from databases.database_tools import *
-# DEBUG;; TOREMOVE
-print(get_all_tables(_db_path))
-# TROUBLESHOOTING;;
-#delete_by_id(_db_path, 'movies', 14)
-#delete_table(_db_path, 'items')
-
-
-# TODO: TOREMOVE
-#@_app.route('/about/')
-#def about():
-#    return '<h3>This is a Flask web application.</h3>'
-#
-#from markupsafe import escape
-#@_app.route('/capitalize/<word>/')
-#def capitalize(word):
-#    return '<h1>{}</h1>'.format(escape(word.capitalize()))
-#
-#@_app.route('/add/<int:n1>/<int:n2>/')
-#def add(n1, n2):
-#    return '<h1>{}</h1>'.format(n1 + n2)
-#
-#...from flask import abort
-#@_app.route('/users/<int:user_id>/')
-#def greet_user(user_id):
-#    users = ['Bob', 'Jane', 'Adam']
-#    try:
-#        return '<h2>Hi {}</h2>'.format(users[user_id])
-#    except IndexError:
-#        abort(404)
