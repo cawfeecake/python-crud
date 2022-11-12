@@ -21,11 +21,12 @@ def get_movies():
         return redirect(url_for('get_movies'))
     all_movies = movies.get_all()
     return f"""
+        <a href="{ url_for('index') }">&lt; Back</a>
         <form method="POST">
           <div><label>Name: <input type="text" name="name"></label></div>
           <div><label>Year: <input type="text" name="year"></label></div>
           <div><label>Rating Point: <input type="text" name="x"><input type="text" name="y"></label></div>
-          <input type="submit" value="Submit">
+          <input type="submit" value="Create">
         </form>
         <hr />
         { f'<p>Inserted: { " ".join([str(i) for i in insert_ids]) }</p>' if insert_ids else '' }
@@ -61,6 +62,7 @@ def get_movie_by_id(movie_id):
         return redirect(url_for('get_movie_by_id', movie_id=movie_id)) # TODO continue to verify this has desired back-nav. behavior
         # note: when "waterfalling" from handling POST req., will add to your window history and make back-nav. difficult
     return f"""
+        <a href="{ url_for('get_movies') }">&lt; Back</a>
         <p>{ movies.get_by_id(movie_id) }</p>
         <hr />
         <form method="POST">
@@ -74,7 +76,7 @@ def get_movie_by_id(movie_id):
           function delete_movie() {{
             const delete_url = '{ url_for('get_movie_by_id', movie_id=movie_id) }';
             fetch(delete_url, {{ method: 'DELETE' }})
-              .then(() => {{ window.location.href = '{ url_for('get_movies') }'; }})
+              .then(() => {{ window.location.href = '{ url_for('get_movies') }'; }});
           }}
         </script>
     """
