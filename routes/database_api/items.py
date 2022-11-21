@@ -1,9 +1,7 @@
 import json
 from typing import List, Type
 
-
 from sqlalchemy.sql import func
-
 
 from .database import db
 
@@ -13,7 +11,7 @@ class Item(db.Model):
     name = db.Column(db.String(200), unique=True, nullable=False)
     description = db.Column(db.String, nullable=False)
 
-    children = db.Column(db.String, nullable=True)
+    children = db.Column(db.String)
 
     created_at = db.Column(db.DateTime(timezone=True), default=func.now())
     update_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
@@ -27,20 +25,23 @@ class Item(db.Model):
             self.children = json.dumps(children_obj)
 
     def remove_child(self, child):
-        children_obj = json.loads(self.children)
-        children_obj.remove(child)
-        self.children = '' if len(children_obj) == 0 else json.dumps(children_obj)
+        children_obj = json.loads(self.children) if self.children else []
+        if children_obj:
+            children_obj.remove(child)
+            self.children = json.dumps(children_obj)
 
 
     def __repr__(self):
-        return f'<Item({self.id}) {{ name="{self.name}", description="{self.description}", num_of_children="{len(json.loads(self.children))}" }}>'
+        children = json.loads(self.children) if self.children else []
+        return f'<Item({self.id}) {{ name="{self.name}", description="{self.description}", num_of_children="{len(children)}" }}>'
 
     def __str__(self):
+        children = json.loads(self.children) if self.children else []
         json_str = {
           "id": self.id,
           "name": self.name,
           "description": self.description,
-          "child_items": f"[{ ', '.join(json.loads(self.children)) }]",
+          "child_items": f"[{ ', '.join(children) }]",
           "created_at": self.created_at,
           "update_at": self.update_at,
         }

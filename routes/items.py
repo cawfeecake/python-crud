@@ -12,9 +12,11 @@ def get_items():
         desc = request.form.get('desc')
         children = request.form.get('children').split()
 
-        add_item(name, desc, children)
+        new_item = add_item(name, desc, children)
+        app.logger.info(f'new item was successfully created ({new_item.id})')
 
-        return redirect(url_for('get_items'))
+        # uncomment to redirect to newly created item
+        #return redirect(url_for('get_item_by_id', item_id=new_item.id))
 
     all_items = Item.query.all()
     return f"""
@@ -45,7 +47,6 @@ def get_item_by_id(item_id):
 
         update_item(retr_item, name, desc, children)
 
-        #return redirect(url_for('get_item_by_id', item_id=item_id)) # can modify client to save on server req.
     return f"""
         <a href="{ url_for('get_items') }">&lt; Back</a>
         <p>{ escape(str(retr_item)) }</p>

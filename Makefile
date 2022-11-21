@@ -9,4 +9,4 @@ rm_backend:
 > rm -f backend.db instance/backend.db
 
 run:
-> flask run
+> flask --debug run --port=8080
