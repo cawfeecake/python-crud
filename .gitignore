@@ -7,3 +7,6 @@ instance/
 # Custom
 ## database
 backend.db
+## local dev
+### MacOS
+.DS_Store

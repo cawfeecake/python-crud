@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{% block title %} InvApp {% endblock %}</h1>
+  <h2>About</h2>
+  <p>
+    Use the navigation above to explore the Inv
+  </p>
+  <h2>Tables</h2>
+  <p>
+    Number of tables: {{ all_tables|length }}
+  </p>
+  <ul>
+    {% for table_name, table_cols in all_tables.items() %}
+      <li><strong>{{ table_name }}</strong>: {{ table_cols|join(' | ') }}</li>
+    {% endfor %}
+  </ul>
+  <h2>Backend Status</h2>
+  <p>
+    SQLite instance (at {{ database_status.file }}) currently uses {{ database_status.size.quantity }} {{ database_status.size.dimension }}
+  </p>
+{% endblock %}

@@ -1,0 +1,4 @@
+- add navigation piece (check out Blueprint?) to template/base.html
+    - this is currently hard coded in the .../base.html, and (clunky) requires passing a "nav_funcs" list
+
+-

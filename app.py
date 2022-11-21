@@ -1,14 +1,18 @@
-import os
-from flask import Flask, url_for
+from flask import Flask, render_template, url_for
 from markupsafe import escape
 
 
-from backend import db, path as db_path
+from routes.database_api.database import \
+    init_database as init_routes_database, \
+    database_status, \
+    get_all_tables
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
-db.init_app(app)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+
+init_routes_database(app)
 
 
 # TODO custom 404 (i.e. "item not found" vs. "anything else not found"
@@ -19,74 +23,29 @@ db.init_app(app)
 #    #return f'{ escape(e.response) }: { escape(attrs_str) }'
 #    return f'{ escape(locals()) }'
 
-
-# for DEBUG
-##############
-from databases.database_tools import *
-
-print(get_all_tables(db_path))
-
-from sqlalchemy import create_engine
-engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
-from sqlalchemy import inspect
-inspector = inspect(engine)
-tables = inspector.get_table_names()
-print(f'# of tables: { len(tables) }')
-for table_name in tables:
-    print(f'{table_name}: { " | ".join(col["name"] for col in inspector.get_columns(table_name)) }')
-
-# ad-hoc db changes
-#delete_table(db_path, 'items')
-#delete_by_id(db_path, 'movies', 14)
-##############
-# for DEBUG
-
-
 index_funcs = []
 with app.app_context():
     import routes.movies
     index_funcs.append(('movies', 'get_movies'))
 
-    #import routes.locations
-    #index_funcs.append(('locations', 'get_locations'))
-
     import routes.items
     index_funcs.append(('items', 'get_items'))
 
-
-# TODO determine what we need to do here for adding tables...
-#if not os.path.exists(DB_NAME):
-with app.app_context():
-    db.create_all()
-    print(f'created tables in backend.')
-    engine = db.get_engine()
-    inspector = inspect(engine)
-    tables = inspector.get_table_names()
-    print(f'# of tables: { len(tables) }')
-    for table_name in tables:
-        print(f'{table_name}: { " | ".join(col["name"] for col in inspector.get_columns(table_name)) }')
-
+    #import routes.locations
+    #index_funcs.append(('locations', 'get_locations'))
 
 @app.route('/')
 def index():
-    file_size = os.path.getsize(db_path)
-    size_dim = 'bytes'
-    if file_size > 1e7:
-        size_dim = 'GB'
-        file_size *= 1e-9
-    elif file_size > 1e5:
-        size_dim = 'MB'
-        file_size *= 1e-6
-    elif file_size > 1e3:
-        size_dim = 'KB'
-        file_size *= 1e-3
+    return render_template('index.html',
+        nav_funcs=index_funcs,
+        all_tables=get_all_tables(),
+        database_status=database_status(),
+    )
 
-    return f"""
-        <h1>Python C. R. U. D.</h1>
-        <h2>Pages:</h2>
-        <ul>
-        { ''.join([ f'<li><a href="{ url_for(func) }">{ name }</a></li>' for (name, func) in index_funcs ]) }
-        </ul>
-        <h2>Backend Status:</h2>
-        <p>file { db_path } is currently { round(file_size, 2) } { size_dim } in size</p>
-    """
+# TODO remove below
+# month is in range [1, 12]
+@app.route('/cal/<int:month>/')
+def add(month):
+    # TODO render template?
+    #return f'<h1>{month}</h1>'
+    return render_template('base.html', title=month)
