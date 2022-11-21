@@ -17,7 +17,17 @@ class Item(db.Model):
     update_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
 
-    # TODO make these wrappers for a setter
+    def to_json(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'children':
+                json.loads(self.children) if self.children else [],
+            'created_at': self.created_at,
+            'update_at': self.update_at,
+        }
+
     def add_child(self, child):
         children_obj = json.loads(self.children) if self.children else []
         if child not in children_obj:
@@ -30,22 +40,15 @@ class Item(db.Model):
             children_obj.remove(child)
             self.children = json.dumps(children_obj)
 
-
     def __repr__(self):
-        children = json.loads(self.children) if self.children else []
-        return f'<Item({self.id}) {{ name="{self.name}", description="{self.description}", num_of_children="{len(children)}" }}>'
+        obj = self.to_json()
+        return f'<Item({obj["id"]}) {{ name="{obj["name"]}", description="{obj["description"]}", num_of_children="{len(obj["children"])}" }}>'
 
     def __str__(self):
-        children = json.loads(self.children) if self.children else []
-        json_str = {
-          "id": self.id,
-          "name": self.name,
-          "description": self.description,
-          "child_items": f"[{ ', '.join(children) }]",
-          "created_at": self.created_at,
-          "update_at": self.update_at,
-        }
-        return json.dumps(json_str, indent=4, default=str)
+        obj = self.to_json()
+        return json.dumps(obj, indent=2, default=str)
+        # dev: `default=str` is to convert nonserialize by calling str() which
+        #      is useful for displaying the datetime objects
 
 
 def add_item(name: str, desc: str, children: List[str]) -> Type[Item]:

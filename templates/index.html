@@ -15,8 +15,4 @@
       <li><strong>{{ table_name }}</strong>: {{ table_cols|join(' | ') }}</li>
     {% endfor %}
   </ul>
-  <h2>Backend Status</h2>
-  <p>
-    SQLite instance (at {{ database_status.file }}) currently uses {{ database_status.size.quantity }} {{ database_status.size.dimension }}
-  </p>
 {% endblock %}
