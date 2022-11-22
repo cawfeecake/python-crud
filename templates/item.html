@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <a href="{{ url_for('get_items') }}">&lt; Back</a>
+  <h1>{% block title %} InvApp - {{ item.id }}{% endblock %}</h1>
+
+  <form method="POST">
+    <div><label>Name: <input type="text" name="name"></label></div>
+    <div><label>Description: <input type="text" name="desc"></label></div>
+    <div><label>Children to add: <input type="text" name="children"></label></div>
+    <input type="submit" value="Update">
+  </form>
+  <button onclick="delete_item()">Delete</button>
+  <script>
+    function delete_item() {
+      const delete_url = '{{ url_for('get_item_by_id', item_id=item.id) }}';
+      fetch(delete_url, { method: 'DELETE' })
+        .then(() => { window.location.href = '{{ url_for('get_items') }}'; });
+    }
+  </script>
+  <hr />
+  <pre>{{ item }}</pre>
+{% endblock %}

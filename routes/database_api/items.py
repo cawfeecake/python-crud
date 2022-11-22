@@ -1,5 +1,4 @@
 import json
-from typing import List, Type
 
 from sqlalchemy.sql import func
 
@@ -51,7 +50,7 @@ class Item(db.Model):
         #      is useful for displaying the datetime objects
 
 
-def add_item(name: str, desc: str, children: List[str]) -> Type[Item]:
+def add_item(name: str, desc: str, children: list[str]) -> Item:
         new_item = Item(name=name, description=desc)
         for c in children:
             new_item.add_child(c)
@@ -64,7 +63,7 @@ def delete_item(item: Item) -> None:
         db.session.delete(item)
         db.session.commit()
 
-def update_item(item: Item, name: str, desc: str, children: List[str]) -> Type[Item]:
+def update_item(item: Item, name: str, desc: str, children: list[str]) -> Item:
         item.name = name
         item.description = desc
         for c in children:

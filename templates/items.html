@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <a href="{{ url_for('index') }}">&lt; Back</a>
+  <h1>{% block title %} InvApp - Items ({{ items|length }}){% endblock %}</h1>
+  <form method="POST">
+    <div><label>Name: <input type="text" name="name"></label></div>
+    <div><label>Description: <input type="text" name="desc"></label></div>
+    <div><label>Children: <input type="text" name="children"></label></div>
+    <input type="submit" value="Create">
+  </form>
+  <hr />
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Created at</th>
+      <th>Last updated at</th>
+    </tr>
+    {% for item in items %}
+    <tr>
+      <td><a href="{{ url_for("get_item_by_id", item_id=item.id) }}">{{ item.id }}</a></td>
+      <td><a href="{{ url_for("get_item_by_id", item_id=item.id) }}">{{ item.name }}</a></td>
+      <td>{{ item.description }}</td>
+      <td>{{ item.created_at }}</td>
+      <td>{{ item.updated_at }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}
